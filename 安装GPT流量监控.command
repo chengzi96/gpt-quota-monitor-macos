@@ -84,22 +84,21 @@ fi
 
 product_version="$(/usr/bin/sw_vers -productVersion 2>/dev/null || true)"
 product_major="${product_version%%.*}"
-if [[ -z "$product_major" || "$product_major" -lt 26 ]]; then
-  show_dialog "GPT流量监控 v0.3.27 使用 macOS 26 原生 Liquid Glass，仅支持 macOS 26 或更高版本。"
+if [[ -z "$product_major" || "$product_major" -lt 13 ]]; then
+  show_dialog "GPT流量监控 v0.3.28 仅支持 macOS 13 或更高版本。"
   exit 1
 fi
 
 if ! command -v swift >/dev/null 2>&1 || ! command -v codesign >/dev/null 2>&1 || ! command -v xcrun >/dev/null 2>&1; then
-  show_dialog "首次安装需要 Xcode / Apple Command Line Tools 26。接下来会打开 Apple 官方安装窗口，完成后请再次双击本安装器。"
-  xcode-select --install >/dev/null 2>&1 || true
+  show_dialog "源码安装需要 Xcode / Apple Command Line Tools 26。普通用户建议直接下载 GitHub Releases 中的预编译版本。"
   trap - ERR
-  exit 0
+  exit 1
 fi
 
 sdk_version="$(/usr/bin/xcrun --sdk macosx --show-sdk-version 2>/dev/null || true)"
 sdk_major="${sdk_version%%.*}"
 if [[ -z "$sdk_major" || "$sdk_major" -lt 26 ]]; then
-  show_dialog "当前开发工具不包含 macOS 26 SDK。请先更新到 Xcode / Apple Command Line Tools 26 后再安装。"
+  show_dialog "源码安装需要 macOS 26 SDK（Xcode / Apple Command Line Tools 26）。普通用户建议下载 GitHub Releases 中的预编译版本。"
   trap - ERR
   exit 1
 fi
@@ -120,7 +119,7 @@ for candidate in "$install_target" "$legacy_target"; do
   if [[ -e "$candidate" && ! -w "$candidate" ]]; then needs_sudo=1; fi
 done
 
-echo "正在准备并构建 GPT流量监控 v0.3.27…"
+echo "正在准备并构建 GPT流量监控 v0.3.28…"
 cd "$source_dir"
 /bin/chmod +x scripts/build-app.sh
 ./scripts/build-app.sh

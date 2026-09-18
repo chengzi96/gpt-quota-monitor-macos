@@ -6,7 +6,7 @@ let package = Package(
     name: "AIQuotaBar",
     defaultLocalization: "zh-Hans",
     platforms: [
-        .macOS(.v26)
+        .macOS(.v13)
     ],
     products: [
         .executable(name: "AIQuotaBar", targets: ["AIQuotaBar"])

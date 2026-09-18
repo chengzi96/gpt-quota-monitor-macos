@@ -12,8 +12,8 @@ enum DesignTokens {
     static let secondaryText = Color.secondary
     static let tertiaryText = Color.secondary.opacity(0.68)
 
-    // v0.3.4 targets macOS 26 only. The main panel uses dark native Liquid Glass;
-    // these custom colors stay quiet so system reflection/refraction remains visible.
+    // macOS 26+ uses native Liquid Glass; macOS 13–15 uses a system Material fallback.
+    // Keep custom colors quiet so both surfaces remain legible.
     static let divider = Color.primary.opacity(0.050)
     static let track = Color.primary.opacity(0.060)
     static let glassSheen = Color.white.opacity(0.13)
