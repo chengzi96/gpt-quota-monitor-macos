@@ -87,11 +87,31 @@ jobs:
           set -euo pipefail
           ditto -x -k "dist/GPT流量监控-0.3.28-macOS13+.zip" dist/unpacked
           APP="dist/unpacked/GPT流量监控.app"
+          BIN="$APP/Contents/MacOS/AIQuotaBar"
           codesign --verify --deep --strict "$APP"
-          open "$APP"
-          sleep 5
-          pgrep -x AIQuotaBar
-          pkill -x AIQuotaBar || true
+
+          "$BIN" >/tmp/gpt-flow-monitor.stdout 2>/tmp/gpt-flow-monitor.stderr &
+          pid=$!
+          sleep 6
+
+          if kill -0 "$pid" >/dev/null 2>&1; then
+            echo "GPT流量监控 is alive on macOS 14 (pid=$pid)"
+            kill "$pid" || true
+            wait "$pid" || true
+          else
+            status=0
+            wait "$pid" || status=$?
+            echo "GPT流量监控 exited early on macOS 14 (status=$status)" >&2
+            echo "=== stdout ==="
+            cat /tmp/gpt-flow-monitor.stdout || true
+            echo "=== stderr ==="
+            cat /tmp/gpt-flow-monitor.stderr || true
+            echo "=== DiagnosticReports ==="
+            find "$HOME/Library/Logs/DiagnosticReports" -maxdepth 1 -type f \
+              \( -name 'AIQuotaBar*.ips' -o -name 'AIQuotaBar*.crash' -o -name 'GPT流量监控*.ips' \) \
+              -print -exec cat {} \; 2>/dev/null || true
+            exit 1
+          fi
 
   release:
     name: Publish GitHub Release
