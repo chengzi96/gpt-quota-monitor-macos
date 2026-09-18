@@ -1,0 +1,7 @@
+.DS_Store
+.build/
+dist/
+.swiftpm/
+DerivedData/
+vendor/codex-app-server-aarch64-apple-darwin-*.tar.gz
+*.xcuserstate

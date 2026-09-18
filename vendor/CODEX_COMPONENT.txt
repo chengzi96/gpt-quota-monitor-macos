@@ -1,0 +1,10 @@
+OpenAI Codex App Server component
+
+Version: 0.151.0
+Platform: aarch64-apple-darwin (Apple Silicon)
+Official release tag: rust-v0.151.0
+Official asset: https://github.com/openai/codex/releases/download/rust-v0.151.0/codex-app-server-aarch64-apple-darwin.tar.gz
+SHA-256: 09193ef452f35d3558ac5bef21e14d6e3c9763edaa36e6c614126a15fca0ff57
+License: https://github.com/openai/codex/blob/main/LICENSE
+
+The archive is not committed to this repository. The build script downloads the official asset directly from OpenAI's GitHub release and verifies the SHA-256 before embedding the standalone app server in the built app.
