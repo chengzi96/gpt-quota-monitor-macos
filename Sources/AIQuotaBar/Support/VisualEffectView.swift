@@ -2,8 +2,8 @@ import AppKit
 import SwiftUI
 
 /// 状态栏浮层由自定义透明 NSPanel 承载。 Liquid Glass needs that window
-/// to stay transparent so the macOS 26 glass renderer can sample the desktop
-/// and the window directly behind the popup instead of a pre-painted panel.
+/// to stay transparent so native Liquid Glass (macOS 26+) or the Material
+/// fallback (macOS 13–15) can sample the desktop behind the popup.
 struct TransparentPopoverWindowConfigurator: NSViewRepresentable {
     func makeNSView(context: Context) -> PopoverWindowProbe {
         PopoverWindowProbe(frame: .zero)

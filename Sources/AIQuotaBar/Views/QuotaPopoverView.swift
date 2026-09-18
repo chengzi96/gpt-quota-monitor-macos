@@ -49,14 +49,7 @@ struct QuotaPopoverView: View {
                 .frame(width: 0, height: 0)
                 .allowsHitTesting(false)
         }
-        .background {
-            RoundedRectangle(cornerRadius: DesignTokens.panelRadius, style: .continuous)
-                .fill(Color.black.opacity(0.74))
-        }
-        .glassEffect(
-            .regular.tint(Color.black.opacity(0.62)),
-            in: RoundedRectangle(cornerRadius: DesignTokens.panelRadius, style: .continuous)
-        )
+        .adaptivePanelGlass()
         .clipShape(
             RoundedRectangle(cornerRadius: DesignTokens.panelRadius, style: .continuous)
         )
@@ -96,20 +89,33 @@ struct QuotaPopoverView: View {
 
             Spacer()
 
-            GlassEffectContainer(spacing: 8) {
-                HStack(spacing: 8) {
-                    HeaderGlassButton(
-                        symbol: "arrow.clockwise",
-                        help: "立即刷新",
-                        isBusy: store.refreshState == .refreshing
-                    ) {
-                        Task { await store.refresh() }
-                    }
+            headerActions
+        }
+    }
 
-                    HeaderGlassButton(symbol: "gearshape.fill", help: "设置") {
-                        openSettings(.general)
-                    }
-                }
+    @ViewBuilder
+    private var headerActions: some View {
+        if #available(macOS 26.0, *) {
+            GlassEffectContainer(spacing: 8) {
+                headerButtonRow
+            }
+        } else {
+            headerButtonRow
+        }
+    }
+
+    private var headerButtonRow: some View {
+        HStack(spacing: 8) {
+            HeaderGlassButton(
+                symbol: "arrow.clockwise",
+                help: "立即刷新",
+                isBusy: store.refreshState == .refreshing
+            ) {
+                Task { await store.refresh() }
+            }
+
+            HeaderGlassButton(symbol: "gearshape.fill", help: "设置") {
+                openSettings(.general)
             }
         }
     }

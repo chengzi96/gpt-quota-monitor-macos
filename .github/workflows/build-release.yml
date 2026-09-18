@@ -1,0 +1,136 @@
+name: Build and Release
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build on macOS 26
+    runs-on: macos-26
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Toolchain
+        run: |
+          sw_vers
+          uname -m
+          xcodebuild -version
+          xcrun --sdk macosx --show-sdk-version
+          swift --version
+
+      - name: Test
+        run: swift test
+
+      - name: Build app
+        run: |
+          chmod +x scripts/build-app.sh
+          ./scripts/build-app.sh
+
+      - name: Verify deployment target
+        run: |
+          set -euo pipefail
+          APP="dist/GPT流量监控.app"
+          APP_BIN="$APP/Contents/MacOS/AIQuotaBar"
+          CODEX_BIN="$APP/Contents/Resources/codex-app-server"
+
+          echo "=== GPT流量监控 ==="
+          xcrun vtool -show-build "$APP_BIN"
+          echo "=== Codex App Server ==="
+          xcrun vtool -show-build "$CODEX_BIN"
+
+          app_minos="$(xcrun vtool -show-build "$APP_BIN" | awk '/minos/{print $2; exit}')"
+          codex_minos="$(xcrun vtool -show-build "$CODEX_BIN" | awk '/minos/{print $2; exit}')"
+
+          echo "App minOS: $app_minos"
+          echo "Codex minOS: $codex_minos"
+
+          app_major="${app_minos%%.*}"
+          codex_major="${codex_minos%%.*}"
+
+          if [[ -z "$app_major" || "$app_major" -gt 13 ]]; then
+            echo "App deployment target is higher than macOS 13" >&2
+            exit 1
+          fi
+          if [[ -z "$codex_major" || "$codex_major" -gt 13 ]]; then
+            echo "Bundled Codex App Server requires newer than macOS 13" >&2
+            exit 1
+          fi
+
+      - name: Upload preview artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: GPT流量监控-v0.3.28-macOS13+
+          path: dist/GPT流量监控-0.3.28-macOS13+.zip
+          if-no-files-found: error
+
+  compat-macos14:
+    name: Verify package on macOS 14
+    needs: build
+    runs-on: macos-14
+    steps:
+      - name: Download app
+        uses: actions/download-artifact@v4
+        with:
+          name: GPT流量监控-v0.3.28-macOS13+
+          path: dist
+
+      - name: Verify package compatibility
+        run: |
+          set -euo pipefail
+          ditto -x -k "dist/GPT流量监控-0.3.28-macOS13+.zip" dist/unpacked
+          APP="dist/unpacked/GPT流量监控.app"
+          APP_BIN="$APP/Contents/MacOS/AIQuotaBar"
+          CODEX_BIN="$APP/Contents/Resources/codex-app-server"
+
+          codesign --verify --deep --strict "$APP"
+
+          minimum="$(/usr/libexec/PlistBuddy -c 'Print :LSMinimumSystemVersion' "$APP/Contents/Info.plist")"
+          [[ "$minimum" == "13.0" ]]
+
+          file "$APP_BIN"
+          file "$CODEX_BIN"
+          xcrun vtool -show-build "$APP_BIN"
+          xcrun vtool -show-build "$CODEX_BIN"
+          otool -L "$APP_BIN"
+
+          echo "Package verification passed on macOS $(sw_vers -productVersion) / $(uname -m)"
+          echo "Note: GitHub-hosted macOS runners are headless, so menu-bar GUI launch is not used as a CI gate."
+
+  release:
+    name: Publish GitHub Release
+    needs: [build, compat-macos14]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download release asset
+        uses: actions/download-artifact@v4
+        with:
+          name: GPT流量监控-v0.3.28-macOS13+
+          path: dist
+
+      - name: Create or update release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TAG="v0.3.28"
+          ASSET="dist/GPT流量监控-0.3.28-macOS13+.zip"
+
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$ASSET" --clobber --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create "$TAG" "$ASSET" \
+              --repo "$GITHUB_REPOSITORY" \
+              --target "$GITHUB_SHA" \
+              --title "GPT流量监控 v0.3.28" \
+              --prerelease \
+              --notes $'兼容性更新：\n\n- 运行最低版本降至 macOS 13\n- macOS 26+ 保持原生 Liquid Glass\n- macOS 13–15 自动使用系统 Material 毛玻璃\n- Apple Silicon\n- 修复版继续保留 v0.3.27 的 MainActor 稳定性修复\n\n当前为 Public Preview，App 使用 ad-hoc 签名，尚未进行 Apple Developer ID 公证。'
+          fi

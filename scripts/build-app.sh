@@ -102,7 +102,7 @@ if [[ "$bundle_id" != "com.local.aiquotabar" ]]; then
 fi
 
 app_version="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$project_root/Info.plist")"
-archive_path="$dist_dir/GPT流量监控-$app_version-macOS.zip"
+archive_path="$dist_dir/GPT流量监控-$app_version-macOS13+.zip"
 /bin/rm -f "$archive_path"
 /usr/bin/ditto -c -k --keepParent "$app_dir" "$archive_path"
 

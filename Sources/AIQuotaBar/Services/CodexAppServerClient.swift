@@ -280,7 +280,7 @@ final class CodexAppServerConnection: @unchecked Sendable {
                     "clientInfo": [
                         "name": "ai-quota-bar",
                         "title": "GPT流量监控",
-                        "version": "0.3.27"
+                        "version": "0.3.28"
                     ]
                 ]
             )

@@ -132,7 +132,7 @@ private struct GeneralSettingsView: View {
                     Text("5 分钟").tag(5.0)
                     Text("15 分钟").tag(15.0)
                 }
-                .onChange(of: refreshIntervalMinutes) {
+                .onChange(of: refreshIntervalMinutes) { _ in
                     store.refreshScheduleDidChange()
                 }
             }
@@ -172,7 +172,7 @@ private struct AlertSettingsView: View {
         SettingsPane(title: "额度提醒") {
             Section {
                 Toggle("开启系统通知", isOn: $alertsEnabled)
-                    .onChange(of: alertsEnabled) { _, enabled in
+                    .onChange(of: alertsEnabled) { enabled in
                         guard enabled else {
                             permissionMessage = nil
                             return
@@ -349,7 +349,7 @@ private struct AboutSettingsView: View {
             Section {
                 LabeledContent("版本", value: version)
                 LabeledContent("额度组件", value: "OpenAI App Server 0.151.0")
-                LabeledContent("系统要求", value: "macOS 26 · Apple Silicon")
+                LabeledContent("系统要求", value: "macOS 13+ · Apple Silicon")
             }
 
             Section {

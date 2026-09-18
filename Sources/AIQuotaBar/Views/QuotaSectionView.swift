@@ -42,8 +42,8 @@ struct QuotaSectionView: View {
                     .foregroundStyle(DesignTokens.cyan.opacity(0.95))
                     .padding(.horizontal, 7)
                     .padding(.vertical, 3)
-                    .glassEffect(
-                        .clear.tint(DesignTokens.cyan.opacity(0.10)),
+                    .adaptiveCompactGlass(
+                        tint: DesignTokens.cyan.opacity(0.10),
                         in: Capsule(style: .continuous)
                     )
             }
