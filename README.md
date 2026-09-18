@@ -39,7 +39,7 @@ GPT流量监控常驻 macOS 菜单栏，把 **本周额度** 和 **滚动 5 小�
 | macOS 14 | ✅ | 系统 Material 毛玻璃 |
 | macOS 13 | ✅* | 系统 Material 毛玻璃 |
 
-`*` 二进制最低部署目标设为 macOS 13；GitHub CI 会检查 App 与内置 Codex App Server 的 minOS，并在 macOS 14 ARM runner 上做启动烟测。当前没有 GitHub 托管的 macOS 13 ARM runner，因此 macOS 13 仍建议视为 Public Preview 兼容。
+`*` 二进制最低部署目标设为 macOS 13。GitHub CI 会检查 App 与内置 Codex App Server 的 minOS，并在 macOS 14 ARM runner 上验证签名、架构和链接信息。GitHub 托管的 macOS runner 为无 GUI 环境，不能把菜单栏 App 的实际启动作为 CI 判断依据；macOS 13–15 目前按 Public Preview 兼容，欢迎真机反馈。
 
 目前只发布 **Apple Silicon** 版本。
 
