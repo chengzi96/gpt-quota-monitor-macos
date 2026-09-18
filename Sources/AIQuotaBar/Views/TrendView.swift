@@ -61,8 +61,8 @@ struct TrendView: View {
                                 .foregroundStyle(DesignTokens.primaryText)
                                 .padding(.horizontal, 6)
                                 .padding(.vertical, 4)
-                                .glassEffect(
-                                    .clear,
+                                .adaptiveCompactGlass(
+                                    tint: Color.black.opacity(0.18),
                                     in: RoundedRectangle(cornerRadius: 8, style: .continuous)
                                 )
                         }
@@ -80,11 +80,17 @@ struct TrendView: View {
                             .onContinuousHover { phase in
                                 switch phase {
                                 case .active(let location):
-                                    guard let plotAnchor = proxy.plotFrame else {
-                                        hoveredSample = nil
-                                        return
+                                    let plotFrame: CGRect
+                                    if #available(macOS 14.0, *) {
+                                        guard let plotAnchor = proxy.plotFrame else {
+                                            hoveredSample = nil
+                                            return
+                                        }
+                                        plotFrame = geometry[plotAnchor]
+                                    } else {
+                                        plotFrame = geometry[proxy.plotAreaFrame]
                                     }
-                                    let plotFrame = geometry[plotAnchor]
+
                                     let localX = location.x - plotFrame.origin.x
                                     guard localX >= 0, localX <= plotFrame.width,
                                           let date: Date = proxy.value(atX: localX) else {
